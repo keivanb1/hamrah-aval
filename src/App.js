@@ -10,7 +10,7 @@ function App() {
 
   return (
     <div className="App">
-        <FilterData data={data} />
+        <FilterData data={data}  />
     </div>
   );
 }

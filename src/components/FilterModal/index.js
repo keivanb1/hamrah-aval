@@ -7,35 +7,31 @@ import Modal from '@mui/material/Modal';
 import {useState} from "react";
 import classes from './index.module.scss'
 import {FormControl, Grid, InputLabel, MenuItem, Select, TextField} from "@mui/material";
-import {condition, selectedFilters} from "../../shared/constants";
+import { conditionWithId} from "../../shared/constants";
 
-const FilterModal = () => {
-    const [open, setOpen] = useState(false);
-    const [selected , setSelected] = useState('')
-    const [filteredData, setFilteredData] = useState([{first_name:'', email:'', last_name:'',id:''}]);
-    // const [filteredData, setFilteredData] = useState([]);
+const FilterModal = ({filteration , onFilteredData , data }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [filteredData, setFilteredData] = useState([{}]);
 
     const [selectedName , setSelectedName]= useState('')
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const handleOpen = () => {
+        setIsOpen(true)
+        setFilteredData([{first_name:'', email:'', last_name:'',id:'', condition:''}])
+        filteration(data, [])
+    };
+    const handleClose = () => {
+        setIsOpen(false)
+         setFilteredData([{first_name:'', email:'', last_name:'',id:'', condition:''}])
+    };
 
-    const handleChangeFilterType = ( value , index) => {
-        console.log({ value , index})
+
+    const handleChangeFilterType = ( value ) => {
         setSelectedName(value)
-        // const changeValue = [...filteredData]
-        // changeValue[index][name] = value
-        // setFilteredData(changeValue)
     }
-
-    console.log({filteredData})
-    const handleChange = (e) => {
-        setSelected(e.target.value)
-    }
-
 
     const handleAddFilter = () => {
         if (filteredData.length > 3) return;
-        setFilteredData([...filteredData, {first_name:'', email:'', last_name:'',id:''}])
+        setFilteredData([...filteredData, {first_name:'', email:'', last_name:'',id:'' , condition:''}])
     }
     const handleDeleteFilter = (index) => {
         if (index>0) {
@@ -45,31 +41,31 @@ const FilterModal = () => {
         }
 
     }
-    const handleSubmit = () => {
-        // let array = []
-        // if (Object.values(filteredData).length) {
-        //     array.push(Object.keys())
-        // }
-        // console.log({array})
-        console.log(Object.values(filteredData).length)
-        const newFilter = {
 
-        }
-    }
-    const handleChangeFilterValue = ( value , index) => {
-        console.log({value , index})
+    const handleChangeFilterValue = ( value) => {
         const changeValue = [...filteredData]
-        changeValue[index][selectedName] = value
+        changeValue[0][selectedName] = value
         setFilteredData(changeValue)
+    }
 
-        console.log({changeValue})
+    const handleChangeCondition = (name, value) => {
+        const changeValue = [...filteredData]
+        changeValue[0][name] = value
+        setFilteredData(changeValue)
+    }
+
+
+    const handleSubmit = () => {
+        filteration(data,filteredData)
+        onFilteredData(filteredData)
+        setIsOpen(false)
     }
 
     return (
         <div className={classes.container}>
             <Button onClick={handleOpen} variant='outlined'>اعمال فیلتر‌ها</Button>
             <Modal
-                open={open}
+                open={isOpen}
                 onClose={handleClose}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
@@ -80,21 +76,9 @@ const FilterModal = () => {
                         <CloseIcon className={classes.icon} fontSize='small' onClick={handleClose} />
                     </div>
                     {filteredData.map((item , index)=> {
-                            console.log(selectedFilters.map(data=>data.type)?.[index])
                         return <Grid container spacing='8' className={classes.gridContainer}>
                             <Grid item xs={3}>
-                                <TextField id="outlined-basic" label="نوع فیلتر" variant="outlined" onChange={(e)=>handleChangeFilterType(e.target.value, index)}/>
-                                {/*<FormControl fullWidth>*/}
-                                {/*    <InputLabel id="demo-simple-select-label">نوع فیلتر</InputLabel>*/}
-                                {/*    <Select*/}
-                                {/*        labelId="demo-simple-select-label"*/}
-                                {/*        id="demo-simple-select"*/}
-                                {/*        value={selectedName}*/}
-                                {/*        onChange={(e)=>handleChangeFilterType(selectedName, index)} label='نوع فیلتر'*/}
-                                {/*    >*/}
-                                {/*        {selectedFilters.map(item=> <MenuItem key={item.id} value={item.id}>{item.label} </MenuItem>)}*/}
-                                {/*    </Select>*/}
-                                {/*</FormControl>*/}
+                                <TextField id="outlined-basic"  label="نوع فیلتر" variant="outlined" onChange={(e)=>handleChangeFilterType(e.target.value, index)}/>
                             </Grid>
                             <Grid item xs={3}>
                                 <FormControl fullWidth>
@@ -102,10 +86,9 @@ const FilterModal = () => {
                                     <Select
                                         labelId="demo-simple-select-label"
                                         id="demo-simple-select"
-                                        value={selected}
-                                        onChange={handleChange}
+                                        onChange={(e)=>handleChangeCondition('condition',e.target.value, index)}
                                     >
-                                        {condition.map(item=> <MenuItem key={item.id} value={item.id}>{item.label} </MenuItem>)}
+                                        { conditionWithId.map(cond=><MenuItem key={cond.id} value={ cond.id}>{cond.label} </MenuItem>)}
                                     </Select>
                                 </FormControl>
                             </Grid>
